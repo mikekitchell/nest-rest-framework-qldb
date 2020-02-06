@@ -9,7 +9,8 @@
     "nest",
     "nest-rest-framework",
     "blockchain",
-    "qldb"
+    "qldb",
+    "quantum ledger"
   ],
   "homepage": "https://github.com/benMain/nest-kinesis-producer",
   "bugs": {

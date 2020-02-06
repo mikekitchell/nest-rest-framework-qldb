@@ -34,4 +34,10 @@ export abstract class QldbRestController<
       data.map(async x => await this.transformResponse(x, RestAction.Get)),
     );
   }
+
+  @Get('create-table')
+  async createTable(@Req() request) {
+    await this.runAuthHooks(request);
+    return await this.viewset.createTable();
+  }
 }

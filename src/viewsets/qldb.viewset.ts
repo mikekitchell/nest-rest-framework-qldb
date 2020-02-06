@@ -9,10 +9,7 @@ import { ViewSet, ViewSetQuery } from 'nest-rest-framework';
 import { getFirstResult, writeValueAsIon } from '../qldb.utilities';
 
 export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
-  constructor(
-    private readonly session: QldbSession,
-    private readonly tableName: string,
-  ) {
+  constructor(readonly session: QldbSession, readonly tableName: string) {
     super();
   }
 

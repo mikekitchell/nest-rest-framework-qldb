@@ -9,7 +9,7 @@ export abstract class QldbRestController<
   ResponseDataT
 > extends RestController<string, DataT, RequestDataT, ResponseDataT> {
   constructor(
-    private readonly qldbRestControllerOptions: QldbRestControllerOptions<
+    readonly qldbRestControllerOptions: QldbRestControllerOptions<
       DataT,
       RequestDataT,
       ResponseDataT

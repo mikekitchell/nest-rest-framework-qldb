@@ -49,4 +49,26 @@ describe('ExampleQldbViewset', () => {
       expect(executeLambdaSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('create()', () => {
+    it('should create', async () => {
+      const mockObject: ExampleModel = {
+        name: 'Ben',
+        age: 32,
+        gender: 'male',
+      };
+      executeLambdaSpy.mockReturnValue(Promise.resolve(mockObject));
+      const response = await subject.create(mockObject);
+      expect(response).toEqual(mockObject);
+      expect(executeLambdaSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('destroy()', () => {
+    it('should destroy', async () => {
+      executeLambdaSpy.mockReturnValue(Promise.resolve());
+      await subject.destroy('111');
+      expect(executeLambdaSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -38,6 +38,7 @@ export abstract class QldbRestController<
   @Get('create-table')
   async createTable(@Req() request) {
     await this.runAuthHooks(request);
+
     return await this.viewset.createTable();
   }
 }

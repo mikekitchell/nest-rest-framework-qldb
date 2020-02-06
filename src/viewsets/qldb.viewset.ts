@@ -71,7 +71,9 @@ export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
 
   async createTable(): Promise<number> {
     const statement = `CREATE TABLE ${this.tableName}`;
-    const response: Result = await this.session.executeInline(statement);
+    const response: Result = await this.session.executeLambda(
+      async txn => await txn.executeInline(statement),
+      );
     return response.getResultList().length;
   }
 }

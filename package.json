@@ -12,16 +12,16 @@
     "qldb",
     "quantum ledger"
   ],
-  "homepage": "https://github.com/benMain/nest-kinesis-producer",
+  "homepage": "https://github.com/mikekitchell/nest-rest-framework-qldb",
   "bugs": {
-    "url": "https://github.com/benMain/nest-kinesis-producer/issues"
+    "url": "https://github.com/mikekitchell/nest-rest-framework-qldb/issues"
   },
   "files": [
     "dist"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/benMain/nest-kinesis-producer.git"
+    "url": "https://github.com/mikekitchell/nest-rest-framework-qldb.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

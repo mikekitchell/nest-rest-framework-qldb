@@ -1,8 +1,6 @@
 import {
   QldbSession,
-  QldbWriter,
   Result,
-  TransactionExecutor,
   createQldbWriter,
 } from 'amazon-qldb-driver-nodejs';
 import { ViewSet, ViewSetQuery } from 'nest-rest-framework';
@@ -32,6 +30,7 @@ export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
         await getFirstResult(txn.executeInline(statement, [documentsWriter])),
     );
   }
+
   async retrieve(pk: string): Promise<DataT> {
     const statement = `SELECT id, t.* FROM ${this.tableName} as t BY id where id = ?`;
     const pkParameter = createQldbWriter();
@@ -41,12 +40,15 @@ export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
         await getFirstResult(txn.executeInline(statement, [pkParameter])),
     );
   }
+
   async replace(pk: string, data: DataT): Promise<DataT> {
     throw new Error('Method not implemented.');
   }
+
   async modify(pk: string, data: DataT): Promise<DataT> {
     throw new Error('Method not implemented.');
   }
+
   async destroy(pk: string): Promise<void> {
     const statement = `DELETE FROM ${this.tableName} as t BY id where id = ?`;
     const pkParameter = createQldbWriter();
@@ -65,5 +67,13 @@ export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
       async txn => await txn.executeInline(statement, [pkParameter]),
     );
     return response.getResultList().map(x => (x.value() as unknown) as DataT);
+  }
+
+  async createTable(): Promise<number> {
+    const statement = `CREATE TABLE ${this.tableName}`;
+    const response: Result = await this.session.executeLambda(
+      async txn => await txn.executeInline(statement),
+      );
+    return response.getResultList().length;
   }
 }

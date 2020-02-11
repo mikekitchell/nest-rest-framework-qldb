@@ -1,7 +1,7 @@
 import { Get, Param, Req } from '@nestjs/common';
-import { RestController } from 'nest-rest-framework';
 
 import { QldbRestControllerOptions } from './qldb-rest-controller-options';
+import { RestController } from 'nest-rest-framework';
 
 export abstract class QldbRestController<
   DataT,

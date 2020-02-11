@@ -1,4 +1,5 @@
 import { QldbSession, TransactionExecutor } from 'amazon-qldb-driver-nodejs';
+import { Reader, makeReader } from 'ion-js';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ExampleModel } from './example.model';
@@ -38,14 +39,15 @@ describe('ExampleQldbViewset', () => {
   });
   describe('retrieve()', () => {
     it('should retrieve by key', async () => {
-      const mockResponse: ExampleModel = {
+      const expectedResult: ExampleModel = {
         name: 'Ben',
         age: 32,
         gender: 'male',
       };
+      const mockResponse = makeReader(JSON.stringify(expectedResult));
       executeLambdaSpy.mockReturnValue(Promise.resolve(mockResponse));
       const response = await subject.retrieve('111');
-      expect(response).toEqual(mockResponse);
+      expect(response).toEqual(expectedResult);
       expect(executeLambdaSpy).toHaveBeenCalledTimes(1);
     });
   });

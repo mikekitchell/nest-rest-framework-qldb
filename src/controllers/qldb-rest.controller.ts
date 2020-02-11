@@ -1,7 +1,7 @@
 import { Get, Param, Req } from '@nestjs/common';
-import { RestAction, RestController } from 'nest-rest-framework';
 
 import { QldbRestControllerOptions } from './qldb-rest-controller-options';
+import { RestController } from 'nest-rest-framework';
 
 export abstract class QldbRestController<
   DataT,
@@ -30,9 +30,7 @@ export abstract class QldbRestController<
 
     const data = await this.viewset.history(transformedId);
 
-    return await Promise.all(
-      data.map(async x => await this.transformResponse(x, RestAction.Get)),
-    );
+    return await Promise.all(data);
   }
 
   @Get('create-table')

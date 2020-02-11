@@ -25,18 +25,14 @@ export abstract class QldbRestController<
   @Get('history/:id')
   async getHistory(@Param('id') id: string, @Req() request) {
     await this.runAuthHooks(request);
-
     const transformedId = await this.transformPrimaryKey(id);
-
     const data = await this.viewset.history(transformedId);
-
     return await Promise.all(data);
   }
 
   @Get('create-table')
   async createTable(@Req() request) {
     await this.runAuthHooks(request);
-
     return await this.viewset.createTable();
   }
 }

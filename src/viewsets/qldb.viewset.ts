@@ -4,7 +4,9 @@ import {
   createQldbWriter,
 } from 'amazon-qldb-driver-nodejs';
 import { ViewSet, ViewSetQuery } from 'nest-rest-framework';
-import { getFirstResult, writeValueAsIon } from '../qldb.utilities';
+import { getFirstResult, ionToJSON, writeValueAsIon } from '../qldb.utilities';
+
+import { IonResult } from '../models';
 
 export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
   constructor(readonly session: QldbSession, readonly tableName: string) {
@@ -35,10 +37,11 @@ export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
     const statement = `SELECT id, t.* FROM ${this.tableName} as t BY id where id = ?`;
     const pkParameter = createQldbWriter();
     pkParameter.writeString(pk);
-    return await this.session.executeLambda(
+    const result = await this.session.executeLambda(
       async txn =>
         await getFirstResult(txn.executeInline(statement, [pkParameter])),
     );
+    return ionToJSON(result) as DataT;
   }
 
   async replace(pk: string, data: DataT): Promise<DataT> {
@@ -58,7 +61,7 @@ export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
     );
   }
 
-  async history(pk): Promise<DataT[]> {
+  async history(pk): Promise<Array<IonResult<DataT>>> {
     const statement: string = `SELECT * FROM history( ${this.tableName} ) AS h
         WHERE h.metadata.id = ?`;
     const pkParameter = createQldbWriter();
@@ -66,14 +69,16 @@ export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
     const response: Result = await this.session.executeLambda(
       async txn => await txn.executeInline(statement, [pkParameter]),
     );
-    return response.getResultList().map(x => (x.value() as unknown) as DataT);
+    return response.getResultList().map(x => {
+      return ionToJSON(x);
+    }) as Array<IonResult<DataT>>;
   }
 
   async createTable(): Promise<number> {
     const statement = `CREATE TABLE ${this.tableName}`;
     const response: Result = await this.session.executeLambda(
       async txn => await txn.executeInline(statement),
-      );
+    );
     return response.getResultList().length;
   }
 }

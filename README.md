@@ -37,13 +37,13 @@ Don't worry that there's no code, QldbViewSet know how to talk to the Quantum Le
 import { Injectable, Inject } from '@nestjs/common';
 import { ExampleModel } from './example.model';
 import { QldbSession } from 'amazon-qldb-driver-nodejs';
-import { QLDB_SESSION_TOKEN, QldbViewSet } from 'nest-rest-framework-qldb';
+import { QldbViewSet } from 'nest-rest-framework-qldb';
 
 @Injectable()
 export class ExampleQldbViewset extends QldbViewSet<ExampleModel> {
-    constructor( @Inject(QLDB_SESSION_TOKEN) readonly session: QldbSession) {
-        super(session, 'example-model');
-    }
+  constructor(readonly driver: PooledQldbDriver) {
+    super(driver, 'example-model');
+  }
 }
 
 ```
@@ -81,17 +81,13 @@ import { Module } from '@nestjs/common';
 import { ExampleQldbController } from './example-qldb.controller';
 import { ExampleQldbViewset } from './example-qldb-viewset';
 import { PooledQldbDriver,  } from 'amazon-qldb-driver-nodejs';
-import { QLDB_SESSION_TOKEN } from 'nest-rest-framework-qldb';
 
 @Module({
     providers: [
         ExampleQldbViewset,
         {
-            provide: QLDB_SESSION_TOKEN,
-            useFactory: async () => {
-                const qldbDriver = new PooledQldbDriver('fake-ledger');
-                return await qldbDriver.getSession();
-            },
+            provide: PooledQldbDriver,
+            useValue: new PooledQldbDriver('fake-ledger'),
         },
     ],
     controllers: [ExampleQldbController],

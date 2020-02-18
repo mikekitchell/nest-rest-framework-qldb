@@ -1,5 +1,5 @@
 import {
-  QldbDriver,
+  PooledQldbDriver,
   Result,
   createQldbWriter,
 } from 'amazon-qldb-driver-nodejs';
@@ -9,7 +9,7 @@ import { getFirstResult, ionToJSON, writeValueAsIon } from '../qldb.utilities';
 import { IonResult } from '../models';
 
 export abstract class QldbViewSet<DataT> extends ViewSet<string, DataT> {
-  constructor(readonly driver: QldbDriver, readonly tableName: string) {
+  constructor(readonly driver: PooledQldbDriver, readonly tableName: string) {
     super();
   }
 

@@ -1,5 +1,5 @@
 import {
-  PooledQldbDriver,
+  QldbDriver,
   QldbSession,
   TransactionExecutor,
 } from 'amazon-qldb-driver-nodejs';
@@ -11,9 +11,7 @@ import { makeReader } from 'ion-js';
 
 describe('ExampleQldbViewset', () => {
   let subject: ExampleQldbViewset;
-  let driver: PooledQldbDriver;
-  let session: QldbSession;
-  let getSessionSpy: jest.SpyInstance<Promise<QldbSession>, []>;
+  let driver: QldbDriver;
   let executeLambdaSpy: jest.SpyInstance<
     Promise<any>,
     [
@@ -21,35 +19,22 @@ describe('ExampleQldbViewset', () => {
       ((retryAttempt: number) => void)?,
     ]
   >;
-  let closeSessionSpy: jest.SpyInstance<void, []>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExampleQldbViewset,
         {
-          provide: PooledQldbDriver,
+          provide: QldbDriver,
           useValue: {
-            getSession: () => null,
+            executeLambda: () => null,
           },
         },
       ],
     }).compile();
     subject = module.get<ExampleQldbViewset>(ExampleQldbViewset);
-    driver = module.get<PooledQldbDriver>(PooledQldbDriver);
-    getSessionSpy = jest.spyOn(driver, 'getSession');
-    session = {
-      executeLambda: () => null,
-      close: () => null,
-      executeStatement: () => null,
-      getLedgerName: () => null,
-      getSessionToken: () => null,
-      getTableNames: () => null,
-      startTransaction: () => null,
-    };
-    executeLambdaSpy = jest.spyOn(session, 'executeLambda');
-    closeSessionSpy = jest.spyOn(session, 'close');
-    getSessionSpy.mockReturnValue(Promise.resolve(session));
+    driver = module.get<QldbDriver>(QldbDriver);
+    executeLambdaSpy = jest.spyOn(driver, 'executeLambda');
   });
 
   it('should be defined', () => {
@@ -62,13 +47,14 @@ describe('ExampleQldbViewset', () => {
         age: 32,
         gender: 'male',
       };
-      const mockResponse = makeReader(JSON.stringify(expectedResult));
-      executeLambdaSpy.mockReturnValue(Promise.resolve(mockResponse));
+      executeLambdaSpy.mockReturnValue(Promise.resolve({
+        getResultList() {
+          return [expectedResult];
+        },
+      }));
       const response = await subject.retrieve('111');
       expect(response).toEqual(expectedResult);
-      expect(getSessionSpy).toHaveBeenCalledTimes(1);
       expect(executeLambdaSpy).toHaveBeenCalledTimes(1);
-      expect(closeSessionSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -79,12 +65,20 @@ describe('ExampleQldbViewset', () => {
         age: 32,
         gender: 'male',
       };
-      executeLambdaSpy.mockReturnValue(Promise.resolve(mockObject));
+      const expectedResult: ExampleModel = {
+        id: 'myId',
+        name: 'Ben',
+        age: 32,
+        gender: 'male',
+      };
+      executeLambdaSpy.mockReturnValue(Promise.resolve({
+        getResultList() {
+          return [{ documentId: 'myId' }];
+        },
+      }));
       const response = await subject.create(mockObject);
-      expect(response).toEqual(mockObject);
-      expect(getSessionSpy).toHaveBeenCalledTimes(1);
+      expect(response).toEqual(expectedResult);
       expect(executeLambdaSpy).toHaveBeenCalledTimes(1);
-      expect(closeSessionSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -92,9 +86,7 @@ describe('ExampleQldbViewset', () => {
     it('should destroy', async () => {
       executeLambdaSpy.mockReturnValue(Promise.resolve());
       await subject.destroy('111');
-      expect(getSessionSpy).toHaveBeenCalledTimes(1);
       expect(executeLambdaSpy).toHaveBeenCalledTimes(1);
-      expect(closeSessionSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

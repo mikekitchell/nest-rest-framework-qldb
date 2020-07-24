@@ -95,6 +95,10 @@
               "release": "patch"
             },
             {
+              "type": "breaking",
+              "release": "major"
+            },
+            {
               "type": "chore",
               "release": "patch"
             },
@@ -178,7 +182,7 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "coverageDirectory": "./coverage",
+    "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
   "version": "1.0.3"
